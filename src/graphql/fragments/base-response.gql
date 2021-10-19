@@ -1,0 +1,4 @@
+fragment BaseResponse on ApiResponse {
+  status
+  message
+}

@@ -1,0 +1,12 @@
+fragment AuthResponse on UserResponse {
+  errors {
+    name
+    message
+  }
+  user {
+    ...SimpleUser
+    updatedAt
+  }
+  status
+  message
+}

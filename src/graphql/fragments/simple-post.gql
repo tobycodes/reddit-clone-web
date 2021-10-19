@@ -1,0 +1,14 @@
+fragment SimplePost on Post {
+  id
+  title
+  text
+  createdAt
+  creatorId
+  points
+  snippet
+  slug
+  voteStatus
+  creator {
+    ...SimpleUser
+  }
+}

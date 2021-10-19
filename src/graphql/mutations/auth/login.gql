@@ -1,0 +1,5 @@
+mutation Login($input: UsernamePasswordInput!) {
+  login(input: $input) {
+    ...AuthResponse
+  }
+}
