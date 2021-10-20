@@ -13,7 +13,7 @@ interface Props {
 }
 
 const VoteBox: FC<Props> = ({ postId, points, voteStatus }) => {
-  const [, vote] = useVoteMutation();
+  const [vote] = useVoteMutation();
   const [loading, setLoading] = useState<VoteLoadingState>("none");
 
   const isUpvoted = voteStatus === 1;
@@ -25,7 +25,7 @@ const VoteBox: FC<Props> = ({ postId, points, voteStatus }) => {
 
     setLoading(loadingState);
 
-    const { data } = await vote({ postId, value });
+    const { data } = await vote({ variables: { postId, value } });
     const res = data?.vote;
 
     if (isErrorStatus(res?.status!)) {

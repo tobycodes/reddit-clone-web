@@ -5,15 +5,35 @@ import { Button } from "@chakra-ui/button";
 import InputField from "@components/forms/InputField";
 import Layout from "@components/layout";
 import { Wrapper } from "@components/Wrapper";
-import { useChangePasswordMutation } from "@generated/graphql";
+import {
+  MeDocument,
+  MeQuery,
+  useChangePasswordMutation,
+} from "@generated/graphql";
 import { generateErrorMap } from "@utils/generateErrorMap";
+import useQueryParams from "@hooks/useQueryParams";
+import { isErrorStatus } from "@utils/isErrorStatus";
 
 const initValues = { newPassword: "", confirmPassword: "" };
 
 const ChangePassword = () => {
   const router = useRouter();
+  const token = useQueryParams("token") as string;
+  const [changePassword] = useChangePasswordMutation({
+    update(cache, { data }) {
+      const meQuery = cache.readQuery<MeQuery>({ query: MeDocument });
 
-  const [, changePassword] = useChangePasswordMutation();
+      if (!isErrorStatus(data?.changePassword.status!)) {
+        cache.writeQuery({
+          query: MeDocument,
+          data: {
+            ...meQuery,
+            me: { ...meQuery?.me, user: data?.changePassword.user },
+          },
+        });
+      }
+    },
+  });
 
   return (
     <Layout>
@@ -22,7 +42,7 @@ const ChangePassword = () => {
           initialValues={initValues}
           onSubmit={async (values, { setErrors }) => {
             const { data } = await changePassword({
-              input: { ...values, token: router.query.token as string },
+              variables: { input: { ...values, token } },
             });
 
             const result = data?.changePassword;

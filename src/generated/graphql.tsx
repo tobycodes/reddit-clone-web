@@ -92,7 +92,7 @@ export type MutationUpdatePostArgs = {
 
 
 export type MutationVoteArgs = {
-  postId: Scalars['Float'];
+  postId: Scalars['Int'];
   value: Scalars['Int'];
 };
 
@@ -100,16 +100,16 @@ export type Post = {
   __typename?: 'Post';
   createdAt: Scalars['DateTime'];
   creator: User;
-  creatorId: Scalars['Float'];
+  creatorId: Scalars['Int'];
   deletedAt: Scalars['DateTime'];
   id: Scalars['Int'];
-  points: Scalars['Float'];
+  points: Scalars['Int'];
   slug: Scalars['String'];
   snippet: Scalars['String'];
   text: Scalars['String'];
   title: Scalars['String'];
   updatedAt: Scalars['DateTime'];
-  updoots: Array<Updoot>;
+  updoots?: Maybe<Array<Updoot>>;
   voteStatus?: Maybe<Scalars['Int']>;
 };
 
@@ -144,7 +144,7 @@ export type Query = {
 
 
 export type QueryPostArgs = {
-  id: Scalars['Float'];
+  id: Scalars['Int'];
 };
 
 
@@ -167,9 +167,9 @@ export type User = {
   createdAt: Scalars['DateTime'];
   email: Scalars['String'];
   id: Scalars['Int'];
-  posts: Array<Post>;
+  posts?: Maybe<Array<Post>>;
   updatedAt: Scalars['DateTime'];
-  updoots: Array<Updoot>;
+  updoots?: Maybe<Array<Updoot>>;
   username: Scalars['String'];
 };
 
@@ -242,7 +242,7 @@ export type CreatePostMutationVariables = Exact<{
 export type CreatePostMutation = { __typename?: 'Mutation', createPost: { __typename?: 'PostResponse', status: string, message?: Maybe<string>, errors?: Maybe<Array<{ __typename?: 'FieldError', name: string, message: string }>>, post?: Maybe<{ __typename?: 'Post', id: number, title: string, text: string, createdAt: any, creatorId: number, points: number, snippet: string, slug: string, voteStatus?: Maybe<number>, creator: { __typename?: 'User', id: number, username: string, createdAt: any, email: string } }> } };
 
 export type VoteMutationVariables = Exact<{
-  postId: Scalars['Float'];
+  postId: Scalars['Int'];
   value: Scalars['Int'];
 }>;
 
@@ -261,6 +261,13 @@ export type PostsQueryVariables = Exact<{
 
 
 export type PostsQuery = { __typename?: 'Query', posts: { __typename?: 'PostsResponse', status: string, message?: Maybe<string>, hasMore: boolean, cursor: string, posts?: Maybe<Array<{ __typename?: 'Post', id: number, title: string, text: string, createdAt: any, creatorId: number, points: number, snippet: string, slug: string, voteStatus?: Maybe<number>, creator: { __typename?: 'User', id: number, username: string, createdAt: any, email: string } }>> } };
+
+export type PostQueryVariables = Exact<{
+  id: Scalars['Int'];
+}>;
+
+
+export type PostQuery = { __typename?: 'Query', post: { __typename?: 'PostResponse', status: string, message?: Maybe<string>, post?: Maybe<{ __typename?: 'Post', id: number, title: string, text: string, createdAt: any, creatorId: number, points: number, snippet: string, slug: string, voteStatus?: Maybe<number>, creator: { __typename?: 'User', id: number, username: string, createdAt: any, email: string } }> } };
 
 export const SimpleUserFragmentDoc = gql`
     fragment SimpleUser on User {
@@ -514,7 +521,7 @@ export type CreatePostMutationHookResult = ReturnType<typeof useCreatePostMutati
 export type CreatePostMutationResult = Apollo.MutationResult<CreatePostMutation>;
 export type CreatePostMutationOptions = Apollo.BaseMutationOptions<CreatePostMutation, CreatePostMutationVariables>;
 export const VoteDocument = gql`
-    mutation Vote($postId: Float!, $value: Int!) {
+    mutation Vote($postId: Int!, $value: Int!) {
   vote(postId: $postId, value: $value) {
     status
     message
@@ -627,3 +634,42 @@ export function usePostsLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<Post
 export type PostsQueryHookResult = ReturnType<typeof usePostsQuery>;
 export type PostsLazyQueryHookResult = ReturnType<typeof usePostsLazyQuery>;
 export type PostsQueryResult = Apollo.QueryResult<PostsQuery, PostsQueryVariables>;
+export const PostDocument = gql`
+    query Post($id: Int!) {
+  post(id: $id) {
+    status
+    message
+    post {
+      ...SimplePost
+    }
+  }
+}
+    ${SimplePostFragmentDoc}`;
+
+/**
+ * __usePostQuery__
+ *
+ * To run a query within a React component, call `usePostQuery` and pass it any options that fit your needs.
+ * When your component renders, `usePostQuery` returns an object from Apollo Client that contains loading, error, and data properties
+ * you can use to render your UI.
+ *
+ * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
+ *
+ * @example
+ * const { data, loading, error } = usePostQuery({
+ *   variables: {
+ *      id: // value for 'id'
+ *   },
+ * });
+ */
+export function usePostQuery(baseOptions: Apollo.QueryHookOptions<PostQuery, PostQueryVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useQuery<PostQuery, PostQueryVariables>(PostDocument, options);
+      }
+export function usePostLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<PostQuery, PostQueryVariables>) {
+          const options = {...defaultOptions, ...baseOptions}
+          return Apollo.useLazyQuery<PostQuery, PostQueryVariables>(PostDocument, options);
+        }
+export type PostQueryHookResult = ReturnType<typeof usePostQuery>;
+export type PostLazyQueryHookResult = ReturnType<typeof usePostLazyQuery>;
+export type PostQueryResult = Apollo.QueryResult<PostQuery, PostQueryVariables>;

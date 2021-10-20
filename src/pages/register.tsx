@@ -5,8 +5,9 @@ import { useRouter } from "next/router";
 import { Wrapper } from "@components/Wrapper";
 import InputField from "@components/forms/InputField";
 import Layout from "@components/layout";
-import { useRegisterMutation } from "@generated/graphql";
+import { MeDocument, MeQuery, useRegisterMutation } from "@generated/graphql";
 import { generateErrorMap } from "@utils/generateErrorMap";
+import { isErrorStatus } from "@utils/isErrorStatus";
 
 const initValues = {
   username: "",
@@ -17,7 +18,21 @@ const initValues = {
 
 const RegisterPage = () => {
   const router = useRouter();
-  const [, register] = useRegisterMutation();
+  const [register] = useRegisterMutation({
+    update(cache, { data }) {
+      const meQuery = cache.readQuery<MeQuery>({ query: MeDocument });
+
+      if (!isErrorStatus(data?.register.status!)) {
+        cache.writeQuery({
+          query: MeDocument,
+          data: {
+            ...meQuery,
+            me: { ...meQuery?.me, user: data?.register.user },
+          },
+        });
+      }
+    },
+  });
 
   return (
     <Layout>
@@ -25,7 +40,9 @@ const RegisterPage = () => {
         <Formik
           initialValues={initValues}
           onSubmit={async (values, { setErrors }) => {
-            const { data } = await register({ input: { ...values } });
+            const { data } = await register({
+              variables: { input: values },
+            });
             const res = data?.register;
 
             if (res?.status === "fail" || res?.status === "error") {

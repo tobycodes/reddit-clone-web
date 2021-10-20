@@ -27,7 +27,6 @@
       "@data-layer/*": ["data-layer/*"],
       "@generated/*": ["generated/*"],
       "@hooks/*": ["hooks/*"],
-      "@urql/*": ["urql/*"],
       "@utils/*": ["utils/*"]
     }
   },

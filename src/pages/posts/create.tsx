@@ -5,9 +5,15 @@ import { useRouter } from "next/router";
 import { Wrapper } from "@components/Wrapper";
 import InputField from "@components/forms/InputField";
 import Layout from "@components/layout";
-import { useCreatePostMutation } from "@generated/graphql";
+import {
+  PostsDocument,
+  PostsQuery,
+  useCreatePostMutation,
+} from "@generated/graphql";
 import { generateErrorMap } from "@utils/generateErrorMap";
 import { useIsAuth } from "hooks/useIsAuth";
+import { LIMIT } from "@data-layer/constants";
+import { isErrorStatus } from "@utils/isErrorStatus";
 
 const initValues = {
   title: "",
@@ -15,9 +21,31 @@ const initValues = {
 };
 
 const CreatePost = () => {
-  const [, createPost] = useCreatePostMutation();
-  const { loading, isAuthenticated } = useIsAuth();
+  const [createPost] = useCreatePostMutation({
+    // refetchQueries: [PostsDocument, "posts"],
+    update(cache, { data }) {
+      const postsQuery = cache.readQuery<PostsQuery>({
+        query: PostsDocument,
+        variables: { limit: LIMIT, cursor: null },
+      });
 
+      if (!isErrorStatus(data?.createPost.status!)) {
+        cache.writeQuery({
+          query: PostsDocument,
+          variables: { limit: LIMIT, cursor: null },
+          data: {
+            ...postsQuery,
+            posts: {
+              ...postsQuery?.posts,
+              posts: [data?.createPost.post!, ...postsQuery?.posts.posts!],
+            },
+          },
+        });
+      }
+    },
+  });
+
+  const { loading, isAuthenticated } = useIsAuth();
   const router = useRouter();
 
   if (loading)
@@ -44,7 +72,7 @@ const CreatePost = () => {
         <Formik
           initialValues={initValues}
           onSubmit={async (values, { setErrors }) => {
-            const { data } = await createPost({ input: values });
+            const { data } = await createPost({ variables: { input: values } });
             const res = data?.createPost;
 
             if (res?.status === "fail" || res?.status === "error") {

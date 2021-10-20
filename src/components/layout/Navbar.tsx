@@ -10,12 +10,39 @@ import {
 import { LightMode } from "@chakra-ui/color-mode";
 
 import { DarkModeSwitch } from "@components/DarkModeSwitch";
-import { useLogoutMutation, useMeQuery } from "@generated/graphql";
+import {
+  MeDocument,
+  MeQuery,
+  useLogoutMutation,
+  useMeQuery,
+} from "@generated/graphql";
 import isServer from "@utils/isServer";
+import { isErrorStatus } from "@utils/isErrorStatus";
+import { useRouter } from "next/router";
 
 const Navbar = () => {
-  const [{ fetching: fetchingUser, data }] = useMeQuery({ pause: isServer() });
-  const [{ fetching: loggingOut }, logout] = useLogoutMutation();
+  const { loading: fetchingUser, data } = useMeQuery({ ssr: isServer() });
+  const router = useRouter();
+  const [logout, { loading: loggingOut }] = useLogoutMutation({
+    update(cache, { data }) {
+      const meQuery = cache.readQuery<MeQuery>({ query: MeDocument });
+
+      if (!isErrorStatus(data?.logout.status!)) {
+        cache.writeQuery({
+          query: MeDocument,
+          data: { ...meQuery, me: { ...meQuery?.me, user: null } },
+        });
+      }
+    },
+  });
+
+  const handleLogout = async () => {
+    const { data } = await logout();
+
+    if (!isErrorStatus(data?.logout.status!)) {
+      router.push("/login");
+    }
+  };
 
   const bgColor = useColorModeValue("teal.500", "teal.200");
   const color = useColorModeValue("white", "gray.900");
@@ -51,9 +78,9 @@ const Navbar = () => {
                 profile
               </Link>
             </NextLink>
-            <NextLink href="/posts/create">
+            <NextLink href="/posts">
               <Link ml={4} fontWeight={500}>
-                create post
+                posts
               </Link>
             </NextLink>
             <LightMode>
@@ -62,7 +89,7 @@ const Navbar = () => {
                 fontWeight={500}
                 variant="link"
                 colorScheme="orange"
-                onClick={() => logout()}
+                onClick={handleLogout}
               >
                 Logout
               </Button>

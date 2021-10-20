@@ -6,16 +6,28 @@ import NextLink from "next/link";
 import { Wrapper } from "@components/Wrapper";
 import Layout from "@components/layout";
 import InputField from "@components/forms/InputField";
-import { useLoginMutation } from "@generated/graphql";
+import { MeDocument, MeQuery, useLoginMutation } from "@generated/graphql";
 import { generateErrorMap } from "@utils/generateErrorMap";
-import useQueryParams from "hooks/useQueryParams";
+import useQueryParams from "@hooks/useQueryParams";
+import { isErrorStatus } from "@utils/isErrorStatus";
 
 const initValues = { usernameOrEmail: "", password: "" };
 
 const LoginPage = () => {
-  const [, login] = useLoginMutation();
   const router = useRouter();
-  const redirectUrl = useQueryParams("redirect");
+  const redirectUrl = useQueryParams("redirect") as string;
+  const [login] = useLoginMutation({
+    update(cache, { data }) {
+      const meQuery = cache.readQuery<MeQuery>({ query: MeDocument });
+
+      if (!isErrorStatus(data?.login.status!)) {
+        cache.writeQuery({
+          query: MeDocument,
+          data: { ...meQuery, me: { ...meQuery?.me, user: data?.login.user } },
+        });
+      }
+    },
+  });
 
   return (
     <Layout>
@@ -23,13 +35,15 @@ const LoginPage = () => {
         <Formik
           initialValues={initValues}
           onSubmit={async (values, { setErrors }) => {
-            const { data } = await login({ input: { ...values } });
+            const { data } = await login({
+              variables: { input: { ...values } },
+            });
 
             if (data?.login.errors) {
               const errorObj = generateErrorMap(data.login.errors);
               setErrors(errorObj);
             } else if (data?.login.user) {
-              router.push((redirectUrl as string) || "/");
+              router.push(redirectUrl || "/");
             }
           }}
         >

@@ -3,7 +3,7 @@ import { useRouter } from "next/router";
 import { useMeQuery, User } from "@generated/graphql";
 
 export function useIsAuth() {
-  const [{ data, fetching }] = useMeQuery();
+  const { data, loading: fetching } = useMeQuery();
   const router = useRouter();
   const [loading, setLoading] = useState(true);
   const [isAuthenticated, setIsAuthenticated] = useState(false);

@@ -1,4 +1,4 @@
-mutation Vote($postId: Float!, $value: Int!) {
+mutation Vote($postId: Int!, $value: Int!) {
   vote(postId: $postId, value: $value) {
     status
     message

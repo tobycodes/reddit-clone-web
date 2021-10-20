@@ -1,4 +1,5 @@
 import { useState, useEffect } from "react";
+import NextLink from "next/link";
 import {
   Stack,
   Box,
@@ -6,13 +7,13 @@ import {
   Text,
   Button,
   Flex,
+  Link,
   useColorModeValue,
 } from "@chakra-ui/react";
 import Layout from "@components/layout";
-import { PostsQueryVariables, usePostsQuery } from "@generated/graphql";
 import PostCard from "@components/posts/PostCard";
-
-const limit = 10;
+import { PostsQueryVariables, usePostsQuery } from "@generated/graphql";
+import { LIMIT } from "@data-layer/constants";
 
 type Cursor = string | null;
 
@@ -23,7 +24,7 @@ type PageProps = {
 };
 
 const Posts = ({ variables, isLastPage, onLoadMore }: PageProps) => {
-  const [{ data, error, fetching }] = usePostsQuery({ variables });
+  const { data, error, loading } = usePostsQuery({ variables });
   const [cursor, setCursor] = useState<Cursor>(null);
 
   useEffect(() => {
@@ -60,11 +61,11 @@ const Posts = ({ variables, isLastPage, onLoadMore }: PageProps) => {
           })}
       </Stack>
       <Flex justify="center" mt={4}>
-        {(isLastPage && fetching) || (isLastPage && data?.posts.hasMore) ? (
+        {(isLastPage && loading) || (isLastPage && data?.posts.hasMore) ? (
           <Button
             onClick={() => onLoadMore(cursor)}
             colorScheme="teal"
-            isLoading={fetching}
+            isLoading={loading}
           >
             load more
           </Button>
@@ -75,17 +76,24 @@ const Posts = ({ variables, isLastPage, onLoadMore }: PageProps) => {
 };
 
 const PostsPage = () => {
-  const [pageVariables, setPageVariables] = useState<
-    Array<{ limit: number; cursor?: Cursor }>
-  >([{ limit }]);
+  const [pageVariables, setPageVariables] = useState([
+    { limit: LIMIT, cursor: null as Cursor },
+  ]);
 
   const headingColor = useColorModeValue("teal.500", "teal.200");
 
   return (
     <Layout>
-      <Heading fontSize="xl" mb={5} color={headingColor}>
-        Latest posts
-      </Heading>
+      <Flex justify="space-between" align="center" mb={5}>
+        <Heading as="span" fontSize="xl" color={headingColor}>
+          Latest posts
+        </Heading>
+        <NextLink href="/posts/create">
+          <Link ml={4} fontWeight={500}>
+            create post
+          </Link>
+        </NextLink>
+      </Flex>
       {pageVariables.map((variables, i) => {
         return (
           <Posts
@@ -93,7 +101,7 @@ const PostsPage = () => {
             variables={variables}
             isLastPage={i === pageVariables.length - 1}
             onLoadMore={(cursor) =>
-              setPageVariables([...pageVariables, { cursor, limit }])
+              setPageVariables([...pageVariables, { cursor, limit: LIMIT }])
             }
           />
         );

@@ -11,7 +11,7 @@ import { useForgotPasswordMutation } from "@generated/graphql";
 const initValues = { email: "" };
 
 const ChangePassword = () => {
-  const [, forgotPassword] = useForgotPasswordMutation();
+  const [forgotPassword] = useForgotPasswordMutation();
   const [message, setMessage] = useState("");
   const router = useRouter();
 
@@ -21,8 +21,7 @@ const ChangePassword = () => {
         <Formik
           initialValues={initValues}
           onSubmit={async (values, { setFieldError }) => {
-            const { data } = await forgotPassword(values);
-
+            const { data } = await forgotPassword({ variables: values });
             const result = data?.forgotPassword;
 
             if (result?.status === "error") {
