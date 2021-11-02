@@ -66,7 +66,7 @@ export type MutationCreatePostArgs = {
 
 
 export type MutationDeletePostArgs = {
-  id: Scalars['Float'];
+  id: Scalars['Int'];
 };
 
 
@@ -86,7 +86,7 @@ export type MutationRegisterArgs = {
 
 
 export type MutationUpdatePostArgs = {
-  id: Scalars['Float'];
+  id: Scalars['Int'];
   input: PostInput;
 };
 
@@ -139,12 +139,18 @@ export type Query = {
   __typename?: 'Query';
   me: UserResponse;
   post: PostResponse;
+  postBySlug: PostResponse;
   posts: PostsResponse;
 };
 
 
 export type QueryPostArgs = {
   id: Scalars['Int'];
+};
+
+
+export type QueryPostBySlugArgs = {
+  slug: Scalars['String'];
 };
 
 
@@ -197,9 +203,9 @@ export type AuthResponseFragment = { __typename?: 'UserResponse', status: string
 
 export type BaseResponseFragment = { __typename?: 'ApiResponse', status: string, message?: Maybe<string> };
 
-export type SimplePostFragment = { __typename?: 'Post', id: number, title: string, text: string, createdAt: any, creatorId: number, points: number, snippet: string, slug: string, voteStatus?: Maybe<number>, creator: { __typename?: 'User', id: number, username: string, createdAt: any, email: string } };
+export type SimplePostFragment = { __typename?: 'Post', id: number, title: string, text: string, createdAt: any, creatorId: number, points: number, snippet: string, slug: string, voteStatus?: Maybe<number>, creator: { __typename?: 'User', id: number, username: string, createdAt: any, updatedAt: any, email: string } };
 
-export type SimpleUserFragment = { __typename?: 'User', id: number, username: string, createdAt: any, email: string };
+export type SimpleUserFragment = { __typename?: 'User', id: number, username: string, createdAt: any, updatedAt: any, email: string };
 
 export type ForgotPasswordMutationVariables = Exact<{
   email: Scalars['String'];
@@ -239,7 +245,22 @@ export type CreatePostMutationVariables = Exact<{
 }>;
 
 
-export type CreatePostMutation = { __typename?: 'Mutation', createPost: { __typename?: 'PostResponse', status: string, message?: Maybe<string>, errors?: Maybe<Array<{ __typename?: 'FieldError', name: string, message: string }>>, post?: Maybe<{ __typename?: 'Post', id: number, title: string, text: string, createdAt: any, creatorId: number, points: number, snippet: string, slug: string, voteStatus?: Maybe<number>, creator: { __typename?: 'User', id: number, username: string, createdAt: any, email: string } }> } };
+export type CreatePostMutation = { __typename?: 'Mutation', createPost: { __typename?: 'PostResponse', status: string, message?: Maybe<string>, errors?: Maybe<Array<{ __typename?: 'FieldError', name: string, message: string }>>, post?: Maybe<{ __typename?: 'Post', id: number, title: string, text: string, createdAt: any, creatorId: number, points: number, snippet: string, slug: string, voteStatus?: Maybe<number>, creator: { __typename?: 'User', id: number, username: string, createdAt: any, updatedAt: any, email: string } }> } };
+
+export type DeletePostMutationVariables = Exact<{
+  id: Scalars['Int'];
+}>;
+
+
+export type DeletePostMutation = { __typename?: 'Mutation', deletePost: { __typename?: 'PostResponse', status: string, message?: Maybe<string>, post?: Maybe<{ __typename?: 'Post', id: number, title: string, text: string, createdAt: any, creatorId: number, points: number, snippet: string, slug: string, voteStatus?: Maybe<number>, creator: { __typename?: 'User', id: number, username: string, createdAt: any, updatedAt: any, email: string } }> } };
+
+export type UpdatePostMutationVariables = Exact<{
+  input: PostInput;
+  id: Scalars['Int'];
+}>;
+
+
+export type UpdatePostMutation = { __typename?: 'Mutation', updatePost: { __typename?: 'PostResponse', status: string, message?: Maybe<string>, errors?: Maybe<Array<{ __typename?: 'FieldError', name: string, message: string }>>, post?: Maybe<{ __typename?: 'Post', id: number, title: string, text: string, createdAt: any, creatorId: number, points: number, snippet: string, slug: string, voteStatus?: Maybe<number>, creator: { __typename?: 'User', id: number, username: string, createdAt: any, updatedAt: any, email: string } }> } };
 
 export type VoteMutationVariables = Exact<{
   postId: Scalars['Int'];
@@ -247,7 +268,7 @@ export type VoteMutationVariables = Exact<{
 }>;
 
 
-export type VoteMutation = { __typename?: 'Mutation', vote: { __typename?: 'PostResponse', status: string, message?: Maybe<string>, post?: Maybe<{ __typename?: 'Post', id: number, title: string, text: string, createdAt: any, creatorId: number, points: number, snippet: string, slug: string, voteStatus?: Maybe<number>, creator: { __typename?: 'User', id: number, username: string, createdAt: any, email: string } }> } };
+export type VoteMutation = { __typename?: 'Mutation', vote: { __typename?: 'PostResponse', status: string, message?: Maybe<string>, post?: Maybe<{ __typename?: 'Post', id: number, title: string, text: string, createdAt: any, creatorId: number, points: number, snippet: string, slug: string, voteStatus?: Maybe<number>, creator: { __typename?: 'User', id: number, username: string, createdAt: any, updatedAt: any, email: string } }> } };
 
 export type MeQueryVariables = Exact<{ [key: string]: never; }>;
 
@@ -260,20 +281,28 @@ export type PostsQueryVariables = Exact<{
 }>;
 
 
-export type PostsQuery = { __typename?: 'Query', posts: { __typename?: 'PostsResponse', status: string, message?: Maybe<string>, hasMore: boolean, cursor: string, posts?: Maybe<Array<{ __typename?: 'Post', id: number, title: string, text: string, createdAt: any, creatorId: number, points: number, snippet: string, slug: string, voteStatus?: Maybe<number>, creator: { __typename?: 'User', id: number, username: string, createdAt: any, email: string } }>> } };
+export type PostsQuery = { __typename?: 'Query', posts: { __typename?: 'PostsResponse', status: string, message?: Maybe<string>, hasMore: boolean, cursor: string, posts?: Maybe<Array<{ __typename?: 'Post', id: number, title: string, text: string, createdAt: any, creatorId: number, points: number, snippet: string, slug: string, voteStatus?: Maybe<number>, creator: { __typename?: 'User', id: number, username: string, createdAt: any, updatedAt: any, email: string } }>> } };
+
+export type PostBySlugQueryVariables = Exact<{
+  slug: Scalars['String'];
+}>;
+
+
+export type PostBySlugQuery = { __typename?: 'Query', postBySlug: { __typename?: 'PostResponse', status: string, message?: Maybe<string>, post?: Maybe<{ __typename?: 'Post', id: number, title: string, text: string, createdAt: any, creatorId: number, points: number, snippet: string, slug: string, voteStatus?: Maybe<number>, creator: { __typename?: 'User', id: number, username: string, createdAt: any, updatedAt: any, email: string } }> } };
 
 export type PostQueryVariables = Exact<{
   id: Scalars['Int'];
 }>;
 
 
-export type PostQuery = { __typename?: 'Query', post: { __typename?: 'PostResponse', status: string, message?: Maybe<string>, post?: Maybe<{ __typename?: 'Post', id: number, title: string, text: string, createdAt: any, creatorId: number, points: number, snippet: string, slug: string, voteStatus?: Maybe<number>, creator: { __typename?: 'User', id: number, username: string, createdAt: any, email: string } }> } };
+export type PostQuery = { __typename?: 'Query', post: { __typename?: 'PostResponse', status: string, message?: Maybe<string>, post?: Maybe<{ __typename?: 'Post', id: number, title: string, text: string, createdAt: any, creatorId: number, points: number, snippet: string, slug: string, voteStatus?: Maybe<number>, creator: { __typename?: 'User', id: number, username: string, createdAt: any, updatedAt: any, email: string } }> } };
 
 export const SimpleUserFragmentDoc = gql`
     fragment SimpleUser on User {
   id
   username
   createdAt
+  updatedAt
   email
 }
     `;
@@ -520,6 +549,85 @@ export function useCreatePostMutation(baseOptions?: Apollo.MutationHookOptions<C
 export type CreatePostMutationHookResult = ReturnType<typeof useCreatePostMutation>;
 export type CreatePostMutationResult = Apollo.MutationResult<CreatePostMutation>;
 export type CreatePostMutationOptions = Apollo.BaseMutationOptions<CreatePostMutation, CreatePostMutationVariables>;
+export const DeletePostDocument = gql`
+    mutation DeletePost($id: Int!) {
+  deletePost(id: $id) {
+    status
+    message
+    post {
+      ...SimplePost
+    }
+  }
+}
+    ${SimplePostFragmentDoc}`;
+export type DeletePostMutationFn = Apollo.MutationFunction<DeletePostMutation, DeletePostMutationVariables>;
+
+/**
+ * __useDeletePostMutation__
+ *
+ * To run a mutation, you first call `useDeletePostMutation` within a React component and pass it any options that fit your needs.
+ * When your component renders, `useDeletePostMutation` returns a tuple that includes:
+ * - A mutate function that you can call at any time to execute the mutation
+ * - An object with fields that represent the current status of the mutation's execution
+ *
+ * @param baseOptions options that will be passed into the mutation, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options-2;
+ *
+ * @example
+ * const [deletePostMutation, { data, loading, error }] = useDeletePostMutation({
+ *   variables: {
+ *      id: // value for 'id'
+ *   },
+ * });
+ */
+export function useDeletePostMutation(baseOptions?: Apollo.MutationHookOptions<DeletePostMutation, DeletePostMutationVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useMutation<DeletePostMutation, DeletePostMutationVariables>(DeletePostDocument, options);
+      }
+export type DeletePostMutationHookResult = ReturnType<typeof useDeletePostMutation>;
+export type DeletePostMutationResult = Apollo.MutationResult<DeletePostMutation>;
+export type DeletePostMutationOptions = Apollo.BaseMutationOptions<DeletePostMutation, DeletePostMutationVariables>;
+export const UpdatePostDocument = gql`
+    mutation UpdatePost($input: PostInput!, $id: Int!) {
+  updatePost(input: $input, id: $id) {
+    status
+    message
+    errors {
+      name
+      message
+    }
+    post {
+      ...SimplePost
+    }
+  }
+}
+    ${SimplePostFragmentDoc}`;
+export type UpdatePostMutationFn = Apollo.MutationFunction<UpdatePostMutation, UpdatePostMutationVariables>;
+
+/**
+ * __useUpdatePostMutation__
+ *
+ * To run a mutation, you first call `useUpdatePostMutation` within a React component and pass it any options that fit your needs.
+ * When your component renders, `useUpdatePostMutation` returns a tuple that includes:
+ * - A mutate function that you can call at any time to execute the mutation
+ * - An object with fields that represent the current status of the mutation's execution
+ *
+ * @param baseOptions options that will be passed into the mutation, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options-2;
+ *
+ * @example
+ * const [updatePostMutation, { data, loading, error }] = useUpdatePostMutation({
+ *   variables: {
+ *      input: // value for 'input'
+ *      id: // value for 'id'
+ *   },
+ * });
+ */
+export function useUpdatePostMutation(baseOptions?: Apollo.MutationHookOptions<UpdatePostMutation, UpdatePostMutationVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useMutation<UpdatePostMutation, UpdatePostMutationVariables>(UpdatePostDocument, options);
+      }
+export type UpdatePostMutationHookResult = ReturnType<typeof useUpdatePostMutation>;
+export type UpdatePostMutationResult = Apollo.MutationResult<UpdatePostMutation>;
+export type UpdatePostMutationOptions = Apollo.BaseMutationOptions<UpdatePostMutation, UpdatePostMutationVariables>;
 export const VoteDocument = gql`
     mutation Vote($postId: Int!, $value: Int!) {
   vote(postId: $postId, value: $value) {
@@ -634,6 +742,45 @@ export function usePostsLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<Post
 export type PostsQueryHookResult = ReturnType<typeof usePostsQuery>;
 export type PostsLazyQueryHookResult = ReturnType<typeof usePostsLazyQuery>;
 export type PostsQueryResult = Apollo.QueryResult<PostsQuery, PostsQueryVariables>;
+export const PostBySlugDocument = gql`
+    query PostBySlug($slug: String!) {
+  postBySlug(slug: $slug) {
+    status
+    message
+    post {
+      ...SimplePost
+    }
+  }
+}
+    ${SimplePostFragmentDoc}`;
+
+/**
+ * __usePostBySlugQuery__
+ *
+ * To run a query within a React component, call `usePostBySlugQuery` and pass it any options that fit your needs.
+ * When your component renders, `usePostBySlugQuery` returns an object from Apollo Client that contains loading, error, and data properties
+ * you can use to render your UI.
+ *
+ * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
+ *
+ * @example
+ * const { data, loading, error } = usePostBySlugQuery({
+ *   variables: {
+ *      slug: // value for 'slug'
+ *   },
+ * });
+ */
+export function usePostBySlugQuery(baseOptions: Apollo.QueryHookOptions<PostBySlugQuery, PostBySlugQueryVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useQuery<PostBySlugQuery, PostBySlugQueryVariables>(PostBySlugDocument, options);
+      }
+export function usePostBySlugLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<PostBySlugQuery, PostBySlugQueryVariables>) {
+          const options = {...defaultOptions, ...baseOptions}
+          return Apollo.useLazyQuery<PostBySlugQuery, PostBySlugQueryVariables>(PostBySlugDocument, options);
+        }
+export type PostBySlugQueryHookResult = ReturnType<typeof usePostBySlugQuery>;
+export type PostBySlugLazyQueryHookResult = ReturnType<typeof usePostBySlugLazyQuery>;
+export type PostBySlugQueryResult = Apollo.QueryResult<PostBySlugQuery, PostBySlugQueryVariables>;
 export const PostDocument = gql`
     query Post($id: Int!) {
   post(id: $id) {

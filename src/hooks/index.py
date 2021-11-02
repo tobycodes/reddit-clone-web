@@ -1,0 +1,3 @@
+string = 'string'
+
+print.

@@ -6,6 +6,7 @@ import {
   Button,
   Heading,
   useColorModeValue,
+  Box,
 } from "@chakra-ui/react";
 import { LightMode } from "@chakra-ui/color-mode";
 
@@ -67,33 +68,28 @@ const Navbar = () => {
       <Flex align="center">
         {fetchingUser || loggingOut ? null : data?.me.user ? (
           <>
-            <Text as="span" mr={6}>
-              hello,{" "}
-              <Text as="span" fontWeight={600}>
-                {data?.me.user?.username}
+            <Button mx={4} as="a" colorScheme="pink" href="/posts/create">
+              create post
+            </Button>
+            <Box ml={6}>
+              <Text as="span" mr={4}>
+                hello,{" "}
+                <Text as="span" fontWeight={600}>
+                  {data?.me.user?.username}
+                </Text>
               </Text>
-            </Text>
-            <NextLink href="/profile">
-              <Link ml={4} fontWeight={500}>
-                profile
-              </Link>
-            </NextLink>
-            <NextLink href="/posts">
-              <Link ml={4} fontWeight={500}>
-                posts
-              </Link>
-            </NextLink>
-            <LightMode>
-              <Button
-                mx={4}
-                fontWeight={500}
-                variant="link"
-                colorScheme="orange"
-                onClick={handleLogout}
-              >
-                Logout
-              </Button>
-            </LightMode>
+              <LightMode>
+                <Button
+                  mx={4}
+                  fontWeight={500}
+                  variant="link"
+                  colorScheme="orange"
+                  onClick={handleLogout}
+                >
+                  Logout
+                </Button>
+              </LightMode>
+            </Box>
           </>
         ) : (
           <>

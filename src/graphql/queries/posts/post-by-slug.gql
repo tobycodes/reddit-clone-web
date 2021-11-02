@@ -1,0 +1,9 @@
+query PostBySlug($slug: String!) {
+  postBySlug(slug: $slug) {
+    status
+    message
+    post {
+      ...SimplePost
+    }
+  }
+}

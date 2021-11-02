@@ -1,3 +1,4 @@
+import { useState, useEffect } from "react";
 import { Formik, Form } from "formik";
 import { Button, Box, Text } from "@chakra-ui/react";
 import { useRouter } from "next/router";
@@ -5,53 +6,53 @@ import { useRouter } from "next/router";
 import { Wrapper } from "@components/Wrapper";
 import InputField from "@components/forms/InputField";
 import Layout from "@components/layout";
-import {
-  PostsDocument,
-  PostsQuery,
-  useCreatePostMutation,
-} from "@generated/graphql";
+import { usePostQuery, useUpdatePostMutation } from "@generated/graphql";
 import { generateErrorMap } from "@utils/generateErrorMap";
-import { useIsAuth } from "hooks/useIsAuth";
-import { LIMIT } from "@data-layer/constants";
+import { useIsAuth } from "@hooks/useIsAuth";
 import { isErrorStatus } from "@utils/isErrorStatus";
+import useQueryParams from "@hooks/useQueryParams";
 
-const initValues = {
-  title: "",
-  text: "",
-};
+const EditPost = () => {
+  const { loading, isAuthenticated } = useIsAuth();
+  const postId = useQueryParams("postId") as string;
 
-const CreatePost = () => {
-  const [createPost] = useCreatePostMutation({
-    update(cache, { data }) {
-      const postsQuery = cache.readQuery<PostsQuery>({
-        query: PostsDocument,
-        variables: { limit: LIMIT, cursor: null },
-      });
-
-      if (!isErrorStatus(data?.createPost.status!)) {
-        cache.writeQuery({
-          query: PostsDocument,
-          variables: { limit: LIMIT, cursor: null },
-          data: {
-            ...postsQuery,
-            posts: {
-              ...postsQuery?.posts,
-              posts: [data?.createPost.post!, ...postsQuery?.posts.posts!],
-            },
-          },
-        });
-      }
-    },
+  const {
+    data,
+    loading: loadingPost,
+    error,
+  } = usePostQuery({ variables: { id: +postId } });
+  const [updatePost] = useUpdatePostMutation();
+  const [initValues, setInitValues] = useState({
+    title: "",
+    text: "",
   });
 
-  const { loading, isAuthenticated } = useIsAuth();
   const router = useRouter();
 
-  if (loading)
+  useEffect(() => {
+    if (data && data.post && data.post.post) {
+      const { title, text } = data.post.post;
+
+      setInitValues({ title, text });
+    }
+  }, [data]);
+
+  if (loading || loadingPost)
     return (
       <Layout>
         <Box mt={4} textAlign="center">
           <Text>Loading...</Text>
+        </Box>
+      </Layout>
+    );
+
+  if (error)
+    return (
+      <Layout>
+        <Box mt={4} textAlign="center">
+          <Text>
+            Sorry, there was an error fetching posts. Please refresh the page.
+          </Text>
         </Box>
       </Layout>
     );
@@ -70,21 +71,24 @@ const CreatePost = () => {
       <Wrapper variant="medium">
         <Formik
           initialValues={initValues}
+          enableReinitialize
           onSubmit={async (values, { setErrors }) => {
-            const { data } = await createPost({ variables: { input: values } });
-            const res = data?.createPost;
+            const { data } = await updatePost({
+              variables: { input: values, id: +postId },
+            });
+            const res = data?.updatePost;
 
-            if (res?.status === "fail" || res?.status === "error") {
+            if (isErrorStatus(res?.status!)) {
               if (res?.errors) {
                 const errorObj = generateErrorMap(res.errors);
                 setErrors(errorObj);
               }
 
-              if (res.message) {
+              if (res?.message) {
                 alert(res.message);
               }
             } else {
-              router.push("/posts");
+              router.push(`/posts/${res?.post?.slug}`);
             }
           }}
         >
@@ -103,7 +107,7 @@ const CreatePost = () => {
                 rows={4}
               />
               <Button type="submit" colorScheme="teal" isLoading={isSubmitting}>
-                Post
+                Update
               </Button>
             </Form>
           )}
@@ -113,4 +117,4 @@ const CreatePost = () => {
   );
 };
 
-export default CreatePost;
+export default EditPost;

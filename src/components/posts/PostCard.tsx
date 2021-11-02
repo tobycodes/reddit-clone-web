@@ -1,7 +1,17 @@
 import React, { FC } from "react";
 import NextLink from "next/link";
-import { Box, Heading, Text, BoxProps, Link, Flex } from "@chakra-ui/layout";
+import {
+  Box,
+  Heading,
+  Text,
+  BoxProps,
+  Link,
+  Flex,
+  Button,
+} from "@chakra-ui/react";
+import { EditIcon, DeleteIcon } from "@chakra-ui/icons";
 import VoteBox from "./VoteBox";
+import { useDeletePost } from "@hooks/useDeletePost";
 
 interface Props extends BoxProps {
   postId: number;
@@ -11,6 +21,7 @@ interface Props extends BoxProps {
   authorUsername: string;
   points: number;
   voteStatus: number | null;
+  isOwnPost: boolean;
 }
 
 const PostCard: FC<Props> = ({
@@ -21,8 +32,10 @@ const PostCard: FC<Props> = ({
   points,
   authorUsername,
   voteStatus,
+  isOwnPost,
   ...rest
 }) => {
+  const { handleDeletePost } = useDeletePost();
   return (
     <Box
       p={5}
@@ -34,15 +47,39 @@ const PostCard: FC<Props> = ({
       rounded="md"
       {...rest}
     >
-      <Heading fontSize="md" colorScheme="gray">
-        {title}
-      </Heading>
-      <Text fontSize="13px">
-        posted by{" "}
-        <Text as="span" fontStyle="italic" fontWeight={500}>
-          {authorUsername}
-        </Text>
-      </Text>
+      <Flex justify="space-between" align="center" mb="25px">
+        <Box flex="1">
+          <Heading fontSize="md" colorScheme="gray">
+            {title}
+          </Heading>
+          <Text fontSize="13px">
+            posted by{" "}
+            <Text as="span" fontStyle="italic" fontWeight={500}>
+              {authorUsername}
+            </Text>
+          </Text>
+        </Box>
+        {isOwnPost && (
+          <Flex style={{ gap: "10px" }} alignSelf="flex-start">
+            <Button
+              p="5px"
+              h="25px"
+              as="a"
+              href={`/posts/edit?postId=${postId}`}
+            >
+              <EditIcon height="15px" />
+            </Button>
+            <Button
+              colorScheme="red"
+              p="2px"
+              h="25px"
+              onClick={() => handleDeletePost(postId)}
+            >
+              <DeleteIcon height="15px" />
+            </Button>
+          </Flex>
+        )}
+      </Flex>
       <Flex
         justify="space-between"
         align="center"
@@ -51,7 +88,7 @@ const PostCard: FC<Props> = ({
       >
         <Text mt={4} colorScheme="gray">
           {snippet}{" "}
-          <NextLink href={`/posts/${slug}`}>
+          <NextLink href={{ pathname: "/posts/[slug]", query: { slug } }}>
             <Link fontWeight={500} _hover={{ textDecoration: "underline" }}>
               Read more
             </Link>
